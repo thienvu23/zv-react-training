@@ -1,0 +1,27 @@
+.login {
+  text-align: center;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: 000;
+  flex: 1;
+}
+
+.from {
+}
+
+.from__row {
+  display: flex;
+  align-items: center;
+}
+
+.from__label {
+  font-size: 14px;
+  font-weight: 700;
+  margin-right: 8px; 
+  min-width: 80px;
+  text-align: left;
+}
