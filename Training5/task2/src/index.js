@@ -1,11 +1,14 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import "./index.css";
-import { App } from "./component/App";
+import { App } from "./pages/App";
 import reportWebVitals from "./reportWebVitals";
 import { store, persistor } from "./redux/store";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
+import { setStore } from "./utils/axios";
+
+setStore(store);
 
 ReactDOM.render(
   <React.StrictMode>

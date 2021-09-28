@@ -1,0 +1,144 @@
+.Main {
+  text-align: center;
+  background-color: #fff;
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.header,
+.footer {
+  height: 64px;
+  border-left-width: 0px;
+  border-right-width: 0px;
+  border-style: solid;
+  box-sizing: content-box;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+}
+
+.header {
+  border-bottom-width: 1px;
+  border-bottom-color: #d3d3d3;
+  justify-content: space-between;
+}
+
+.logo {
+  height: 80%;
+}
+
+.name-company {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.user {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  border: 1px solid #0000009d;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  position: relative;
+}
+
+.user:hover .user-menu {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-menu {
+  position: absolute;
+  top: 115%;
+  right: 0;
+  width: 100px;
+  padding: 8px;
+  border: 1px solid #d9d9d9;
+  background-color: #fff;
+  z-index: 1;
+  display: none;
+}
+
+.user-menu::before {
+  content: "";
+  width: 100%;
+  height: 12px;
+  position: absolute;
+  top: -5px;
+  right: 0;
+}
+
+.menu-item {
+  font-size: 13px;
+  flex: 1;
+}
+
+.menu-item:hover {
+  font-weight: 700;
+}
+
+.footer {
+  border-top-width: 1px;
+  border-top-color: #d3d3d3;
+  display: flex;
+  justify-content: space-between;
+}
+
+.footer-text {
+  margin-left: 20px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.footer-text-copy-right {
+  font-size: 16px;
+}
+
+.nav-container {
+  margin: auto;
+  flex: 1;
+  width: 100%;
+  display: flex;
+}
+
+.nav-menu {
+  flex: 1.5;
+  border: 0;
+  border-right-width: 1px;
+  border-right-color: #d9d9d9;
+  border-style: solid;
+}
+
+.nav-menu-list {
+  margin: 0;
+  padding: 0;
+  margin-top: 20px;
+}
+
+.nav-menu-item {
+  list-style: none;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.nav-menu-link {
+  text-decoration: none;
+  color: #333;
+}
+
+.nav-menu-item-active {
+  font-weight: 700;
+}
+
+.nav-menu-item:hover {
+  opacity: 0.7;
+}
+
+.nav-route {
+  flex: 8.5;
+  height: 100%;
+}

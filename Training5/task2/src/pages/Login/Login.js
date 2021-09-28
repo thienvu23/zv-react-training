@@ -2,6 +2,7 @@ import React from "react";
 import "./Login.css";
 
 import { useDispatch, useSelector } from "react-redux";
+import { toast } from "react-toastify";
 
 import { login } from "../../redux/actions/auth";
 
@@ -23,11 +24,11 @@ function Login() {
 
   const onLogin = () => {
     if (!password) {
-      alert("Password is require");
+      toast.warn("Password is require");
       return;
     }
     if (!email) {
-      alert("Email is require");
+      toast.warn("Email is require");
       return;
     }
 

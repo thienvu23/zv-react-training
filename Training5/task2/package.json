@@ -22,6 +22,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "run-server": "node ../../templates/login-mock-api/server.js",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

@@ -6,7 +6,7 @@ const SECRECT_TOKEN = 'otoke';
 
 
 const signToken = (payload) => new Promise((resolve, reject) => {
-  jwt.sign(payload, SECRECT_TOKEN, {expiresIn: "5 minutes", algorithm: 'HS256'}, (error, token) => {
+  jwt.sign(payload, SECRECT_TOKEN, {expiresIn: "30 minutes", algorithm: 'HS256'}, (error, token) => {
     if (error) reject(error);
     else resolve(token);
   });
