@@ -1,12 +1,12 @@
 import { Switch, Route } from "react-router-dom";
 import { LoginPage } from "../component/Login";
-import { AppRouter } from "./main";
+import { MainPage } from "../component/Main";
 
 export const RootRouter = () => {
   return (
     <Switch>
       <Route path={["/login", "/"]} exact component={LoginPage} />
-      <AppRouter />
+      <Route path={["/app", "/*"]} exact component={MainPage} />
     </Switch>
   );
 };
