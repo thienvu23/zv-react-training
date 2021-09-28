@@ -1,4 +1,4 @@
-import { call, put, takeLatest } from "redux-saga/effects";
+import { call, put, takeLatest, takeEvery, delay } from "redux-saga/effects";
 import {
   createTodo,
   createTodoSuccess,
@@ -14,6 +14,7 @@ import {
   removeTodoFail,
 } from "../actions/todo";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 const $axios = axios.create({
   baseURL: "http://localhost:9000/",
@@ -43,8 +44,9 @@ function* fetchTodoSaga() {
 
 function* createTodoSaga(action) {
   try {
-    yield call(() => $axios.post("todos", action.payload));
-    yield put(createTodoSuccess());
+    const res = yield call(() => $axios.post("todos", action.payload));
+
+    yield put(createTodoSuccess(res.data));
   } catch (e) {
     yield put(createTodoFail(getErrorMessage(e)));
   }
@@ -53,26 +55,40 @@ function* createTodoSaga(action) {
 function* editTodoSaga(action) {
   try {
     yield call(() => $axios.put("todos/" + action.payload?.id, action.payload));
-    yield put(editTodoSuccess());
+
+    yield delay(2000); // show loading trick
+
+    yield put(
+      editTodoSuccess({ id: action.payload?.id, data: action.payload })
+    );
   } catch (e) {
-    yield put(editTodoFail(getErrorMessage(e)));
+    toast(getErrorMessage(e));
+    yield put(
+      editTodoFail({ id: action.payload?.id, error: getErrorMessage(e) })
+    );
   }
 }
 
 function* removeTodoSaga(action) {
   try {
     yield call(() => $axios.delete("todos/" + action.payload?.id));
-    yield put(removeTodoSuccess());
+
+    yield delay(2000); // show loading trick
+
+    yield put(removeTodoSuccess({ id: action.payload?.id }));
   } catch (e) {
-    yield put(removeTodoFail(getErrorMessage(e)));
+    toast(getErrorMessage(e));
+    yield put(
+      removeTodoFail({ id: action.payload?.id, error: getErrorMessage(e) })
+    );
   }
 }
 
 function* todoSaga() {
   yield takeLatest(fetchTodo.toString(), fetchTodoSaga);
   yield takeLatest(createTodo.toString(), createTodoSaga);
-  yield takeLatest(editTodo.toString(), editTodoSaga);
-  yield takeLatest(removeTodo.toString(), removeTodoSaga);
+  yield takeEvery(editTodo.toString(), editTodoSaga);
+  yield takeEvery(removeTodo.toString(), removeTodoSaga);
 }
 
 export default todoSaga;

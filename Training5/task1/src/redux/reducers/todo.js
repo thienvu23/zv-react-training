@@ -13,81 +13,81 @@ import {
   removeTodo,
   removeTodoSuccess,
   removeTodoFail,
+  setStatusAction,
 } from "../actions/todo";
 
-const defaultActionStartFun = (state) => {
-  state.loading = true;
-  state.statusAction = false;
-  state.error = null;
-};
-
-const defaultActionErrorFun = (state, action) => {
-  state.loading = false;
-  state.error = action.payload;
-};
+import { STATUS_ACTION } from "../../constant";
 
 const initialState = {
-  loading: false,
   data: {},
-  statusAction: false,
-  error: null,
+  statusActionDefault: { status: STATUS_ACTION.idle, error: null }, // {status: STATUS_ACTION, error: null}
+  statusAction: {}, // {[id]: {status: STATUS_ACTION, error: null}}
 };
 
 export const todoReducer = createReducer(initialState, {
   //Fetch
   [fetchTodo]: (state) => {
-    state.loading = true;
+    state.statusActionDefault.status = STATUS_ACTION.loading;
   },
   [fetchTodoSuccess]: (state, action) => {
-    state.loading = false;
     state.data = action.payload;
+    state.statusActionDefault.status = STATUS_ACTION.idle;
   },
-  [fetchTodoFail]: defaultActionErrorFun,
+  [fetchTodoFail]: (state, action) => {
+    state.statusActionDefault.status = STATUS_ACTION.fail;
+    state.statusActionDefault.error = action.payload;
+  },
 
   //Create
-  [createTodo]: defaultActionStartFun,
-  [createTodoSuccess]: (state) => {
-    state.loading = false;
-    state.statusAction = true;
+  [createTodo]: (state) => {
+    state.statusActionDefault.status = STATUS_ACTION.loading;
   },
-  [createTodoFail]: defaultActionErrorFun,
+  [createTodoSuccess]: (state, action) => {
+    state.data.ids.push(action.payload?.id);
+    state.data.entity[action.payload?.id] = action.payload;
+    state.statusActionDefault.status = STATUS_ACTION.idle;
+  },
+  [createTodoFail]: (state, action) => {
+    state.statusActionDefault.status = STATUS_ACTION.fail;
+    state.statusActionDefault.error = action.payload;
+  },
 
   //Edit
-  [editTodo]: defaultActionStartFun,
-  [editTodoSuccess]: (state) => {
-    state.loading = false;
-    state.statusAction = true;
+  [editTodo]: (state, action) => {
+    state.statusAction[action.payload.id] = { status: STATUS_ACTION.loading };
   },
-  [editTodoFail]: defaultActionErrorFun,
+  [editTodoSuccess]: (state, action) => {
+    const { id, data } = action.payload ?? {};
+    state.statusAction[id] = { status: STATUS_ACTION.success };
+    state.data.entity[id] = data;
+  },
+  [editTodoFail]: (state, action) => {
+    state.statusAction[action.payload.id] = {
+      status: STATUS_ACTION.fail,
+      error: action.payload.error,
+    };
+  },
 
   //Remove
-  [removeTodo]: defaultActionStartFun,
-  [removeTodoSuccess]: (state) => {
-    state.loading = false;
-    state.statusAction = true;
+  [removeTodo]: (state, action) => {
+    state.statusAction[action.payload.id] = { status: STATUS_ACTION.loading };
   },
-  [removeTodoFail]: defaultActionErrorFun,
-});
-
-export const selectorTodoByNameCompleteStatus = createSelector(
-  [(state) => state.todos.data, (_, filter) => filter],
-  (todos, filter) => {
-    const { name, completed } = filter ?? {};
-    const { ids, entity } = todos ?? {};
-
-    return {
-      ids: ids?.filter((id) => {
-        const todoData = entity?.[id];
-        const conditionCompleted =
-          completed === undefined || todoData?.completed === completed;
-        const conditionName = todoData?.name
-          .toLowerCase()
-          .includes(name?.toLowerCase());
-        return conditionCompleted && conditionName;
-      }),
-      entity,
+  [removeTodoSuccess]: (state, action) => {
+    const { id } = action.payload ?? {};
+    delete state.data.entity[id];
+    state.data.ids = state.data.ids.filter((_id) => _id !== id);
+    state.statusAction[id] = { status: STATUS_ACTION.success };
+  },
+  [removeTodoFail]: (state, action) => {
+    state.statusAction[action.payload.id] = {
+      status: STATUS_ACTION.fail,
+      error: action.payload.error,
     };
-  }
-);
+  },
+
+  [setStatusAction]: (state, action) => {
+    state.statusAction[action.payload.id] = action.payload;
+  },
+});
 
 export default todoReducer;

@@ -1,19 +1,59 @@
 import React from "react";
 import "./App.css";
 import { useSelector, useDispatch } from "react-redux";
+import { createSelector } from "reselect";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 import {
   fetchTodo,
   removeTodo,
   createTodo,
   editTodo,
+  setStatusAction,
 } from "./redux/actions/todo";
-import { selectorTodoByNameCompleteStatus } from "./redux/reducers/todo";
+import { setFilter } from "./redux/actions/filter";
+
+import { STATUS_ACTION } from "./constant";
+
+export const selectorTodoByNameCompleteStatus = createSelector(
+  [(state) => state.todos.data, (state) => state.filter],
+  (todos, filter) => {
+    const { name, completed } = filter ?? {};
+    const { ids, entity } = todos ?? {};
+
+    return {
+      ids: ids?.filter((id) => {
+        const todoData = entity?.[id];
+        const conditionCompleted =
+          completed === undefined || todoData?.completed === completed;
+        const conditionName = todoData?.name
+          .toLowerCase()
+          .includes(name?.toLowerCase());
+        return conditionCompleted && conditionName;
+      }),
+      entity,
+    };
+  }
+);
+
+function debounce(func, timeout = 300) {
+  let timer;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      func.apply(this, args);
+    }, timeout);
+  };
+}
 
 function App() {
   const dispatch = useDispatch();
 
-  const loading = useSelector((state) => state.todos.loading);
-  const error = useSelector((state) => state.todos.error);
+  const filter = useSelector((state) => state.filter);
+  const statusActionDefault = useSelector(
+    (state) => state.todos.statusActionDefault
+  );
   const statusAction = useSelector((state) => state.todos.statusAction);
 
   const [dataTodo, setDataTodo] = React.useState({
@@ -21,59 +61,48 @@ function App() {
     name: "",
   });
   const [editId, setEditId] = React.useState("");
-  const [filter, setFilter] = React.useState({
-    name: "",
-    completed: undefined,
-  });
 
   const todos = useSelector((state) =>
     selectorTodoByNameCompleteStatus(state, filter)
   );
-
   const isCreate = !editId;
 
   const todoEditData = todos?.entity?.[editId];
 
   React.useEffect(() => {
-    if (editId) {
-      setDataTodo(todoEditData);
-    }
-  }, [editId]);
-
-  React.useEffect(() => {
-    if (error) {
-      alert(error);
-      return;
-    }
-    if (statusAction) {
-      setEditId("");
-      dispatch(fetchTodo());
-    }
-  }, [statusAction, error]);
-
-  React.useEffect(() => {
     dispatch(fetchTodo());
   }, []);
+
+  React.useEffect(() => {
+    switch (statusActionDefault.status) {
+      case STATUS_ACTION.fail:
+        toast(statusActionDefault.error);
+        break;
+      case STATUS_ACTION.idle:
+        setDataTodo({
+          completed: false,
+          name: "",
+        });
+        break;
+      default:
+        break;
+    }
+  }, [statusActionDefault]);
+
+  React.useEffect(() => {
+    if (editId && statusAction[editId]?.status === STATUS_ACTION.success) {
+      dispatch(setStatusAction({ id: editId, status: STATUS_ACTION.idle }));
+      setEditId("");
+      setDataTodo({ completed: false, name: "" });
+    }
+  }, [statusAction, editId]);
 
   const removeTodoClick = (id) => {
     let isConfirm = window.confirm("Are you sure delete item?");
     isConfirm && dispatch(removeTodo({ id }));
   };
 
-  const onEditClickItem = (id) => {
-    setEditId(id);
-  };
-
-  React.useEffect(() => {
-    if (statusAction) {
-      setDataTodo({
-        completed: false,
-        name: "",
-      });
-    }
-  }, [statusAction]);
-
-  const onChangeCompleted = (e) => {
+  const onChangeCompleted = () => {
     setDataTodo({
       ...dataTodo,
       completed: !dataTodo.completed,
@@ -89,7 +118,7 @@ function App() {
 
   const onClickContinue = () => {
     if (!dataTodo.name) {
-      alert("Name is require");
+      toast.error("Name is require");
       return;
     }
     if (isCreate) {
@@ -99,19 +128,32 @@ function App() {
     }
   };
 
-  const onChangeTextSearch = ({ target }) => {
-    setFilter((preFilter) => ({
-      ...preFilter,
-      name: target.value,
-    }));
+  const onClickCancel = () => {
+    setEditId("");
+    setDataTodo({ completed: false, name: "" });
+  };
+
+  const debounceChangeName = debounce((name) => {
+    dispatch(
+      setFilter({
+        ...filter,
+        name,
+      })
+    );
+  }, 500);
+
+  const onChangeTextSearch = (e) => {
+    e.persist();
+    debounceChangeName(e.target.value);
   };
 
   const onChangeValueCompletedStatus = ({ target }) => {
-    console.log("onChangeValueCompletedStatus", target.value, !!target.value);
-    setFilter((preFilter) => ({
-      ...preFilter,
-      completed: target.value != "" ? target.value === "true" : undefined,
-    }));
+    dispatch(
+      setFilter({
+        ...filter,
+        completed: target.value != "" ? target.value === "true" : undefined,
+      })
+    );
   };
 
   return (
@@ -120,7 +162,6 @@ function App() {
         <p>Todo App</p>
       </header>
       <div className="white-space" />
-
       {/* Create Edit Todo */}
       <div className="container">
         <h3>
@@ -148,6 +189,12 @@ function App() {
         <button type="button" className="button" onClick={onClickContinue}>
           Continue
         </button>
+        <div className="white-space" />
+        {!!editId && (
+          <button type="button" className="button" onClick={onClickCancel}>
+            Cancel
+          </button>
+        )}
 
         <div className="white-space-large" />
         <div className="white-space-large" />
@@ -174,7 +221,7 @@ function App() {
               value={""}
               defaultChecked="true"
             />
-            <label for="All">All</label>
+            <label htmlFor="All">All</label>
             <div className="black-space" />
             <input
               type="radio"
@@ -182,7 +229,7 @@ function App() {
               id="Completed"
               value={true}
             />
-            <label for="Completed">Completed</label>
+            <label htmlFor="Completed">Completed</label>
             <div className="black-space" />
             <input
               type="radio"
@@ -190,7 +237,7 @@ function App() {
               id="UnCompleted"
               value={false}
             />
-            <label for="UnCompleted">UnCompleted</label>
+            <label htmlFor="UnCompleted">UnCompleted</label>
           </div>
         </div>
         <div className="white-space" />
@@ -213,20 +260,43 @@ function App() {
                   />
                 </td>
                 <td className="td-col-action-content">
-                  <button onClick={() => onEditClickItem(id)}>Edit</button>
+                  <button
+                    onClick={() => {
+                      setEditId(id);
+                      setDataTodo(dataById);
+                    }}
+                  >
+                    Edit
+                  </button>
                   <div className="black-space" />
                   <button onClick={() => removeTodoClick(id)}>Remove</button>
+                  {statusAction[id]?.status === STATUS_ACTION.loading && (
+                    <div className="loading-view">
+                      <div className="loader-small" />
+                    </div>
+                  )}
                 </td>
               </tr>
             );
           })}
         </table>
-        {loading && (
+        {statusActionDefault.status == STATUS_ACTION.loading && (
           <div className="loading-view">
             <div className="loader" />
           </div>
         )}
       </div>
+      <ToastContainer
+        position="bottom-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </div>
   );
 }

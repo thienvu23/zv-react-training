@@ -15,3 +15,5 @@ export const editTodoSuccess = createAction("todos/editTodoSuccess");
 export const removeTodo = createAction("todos/removeTodo");
 export const removeTodoSuccess = createAction("todos/removeTodoSuccess");
 export const removeTodoFail = createAction("todos/removeTodoFail");
+
+export const setStatusAction = createAction("todos/setStatusAction");
