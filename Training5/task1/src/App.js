@@ -133,14 +133,17 @@ function App() {
     setDataTodo({ completed: false, name: "" });
   };
 
-  const debounceChangeName = debounce((name) => {
-    dispatch(
-      setFilter({
-        ...filter,
-        name,
-      })
-    );
-  }, 500);
+  const debounceChangeName = React.useCallback(
+    debounce((name) => {
+      dispatch(
+        setFilter({
+          ...filter,
+          name,
+        })
+      );
+    }, 500),
+    []
+  );
 
   const onChangeTextSearch = (e) => {
     e.persist();
