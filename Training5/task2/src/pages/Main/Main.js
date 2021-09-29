@@ -1,7 +1,7 @@
 import "./Main.css";
 import React from "react";
-import { AppRouter, PATH_CHILD } from "../../routes/main";
-import { NavLink, useHistory, useLocation } from "react-router-dom";
+import { AppRouter, PATH_CHILD, PATH_ROOT } from "../../routes/main";
+import { NavLink, useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 
 import { logout, getProfile } from "../../redux/actions/auth";

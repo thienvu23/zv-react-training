@@ -1,7 +1,7 @@
 export function NotFound() {
   return (
-    <div>
-      <h3>404 NotFound</h3>
+    <div style={{ padding: 20 }}>
+      <h1>404 NotFound</h1>
     </div>
   );
 }
