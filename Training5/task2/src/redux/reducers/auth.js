@@ -21,7 +21,7 @@ const initialState = {
 };
 
 export const authReducer = createReducer(initialState, {
-  //Fetch
+  //Login logout
   [login]: (state) => {
     state.loading = true;
   },
@@ -36,6 +36,7 @@ export const authReducer = createReducer(initialState, {
     state.token = "";
   },
 
+  //getProfile
   [getProfile]: (state) => {
     state.loading = true;
   },

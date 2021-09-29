@@ -17,7 +17,7 @@ const getErrorMessage = (e) => {
     return "Login session expired";
   }
   const { data } = e?.response ?? {};
-  console.log("data", data);
+
   const error = data
     ? typeof data?.error == "string"
       ? data?.error

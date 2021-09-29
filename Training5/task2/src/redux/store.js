@@ -27,8 +27,8 @@ sagaMiddleware.run(rootSaga);
 
 const persistor = persistStore(store);
 
-store.subscribe(() => {
-  console.log("state", store.getState());
-});
+// store.subscribe(() => {
+//   console.log("state", store.getState());
+// });
 
 export { store, persistor };
