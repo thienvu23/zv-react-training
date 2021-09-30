@@ -3,7 +3,7 @@ import { createReducer } from "@reduxjs/toolkit";
 import { syncNetworkStatus } from "../actions/network";
 
 const initialState = {
-  isConnected: false,
+  isConnected: navigator.onLine,
 };
 
 const tasksReducer = createReducer(initialState, {

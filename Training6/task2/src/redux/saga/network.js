@@ -1,4 +1,4 @@
-import { take, put, fork, delay } from "redux-saga/effects";
+import { take, put, fork } from "redux-saga/effects";
 import { eventChannel } from "redux-saga";
 import { syncNetworkStatus } from "../actions/network";
 
@@ -27,8 +27,6 @@ function* startChannelNetwork() {
 
 function* networkSaga() {
   try {
-    yield delay(500);
-    yield put(syncNetworkStatus(navigator.onLine));
     yield fork(startChannelNetwork);
   } catch (e) {
     console.log("networkSaga error", e);

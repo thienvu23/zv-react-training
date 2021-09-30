@@ -9,7 +9,7 @@ import {
 } from "redux-saga/effects";
 
 import { syncNetworkStatus } from "../actions/network";
-import { changeStatusTask, removeTask } from "../actions/tasks";
+import { changeStatusTask } from "../actions/tasks";
 import { selectorTasksReady } from "../reducers/tasks";
 
 import { STATUS_TASK } from "../../constant";
@@ -45,9 +45,17 @@ function* runTaskSubmittingAuto() {
 
 function* networkCheckAutoSubmitting() {
   let taskRunSubmittingAuto;
+  let firstLoad = false;
   while (true) {
-    const { payload: networkConnected } = yield take(syncNetworkStatus.type);
-    console.log("networkConnected", networkConnected);
+    let networkConnected;
+
+    if (firstLoad) {
+      networkConnected = (yield take(syncNetworkStatus.type))?.payload;
+    } else {
+      firstLoad = true;
+      networkConnected = yield select((state) => state.network.isConnected);
+    }
+
     if (networkConnected && !taskRunSubmittingAuto) {
       // That's meaning in the online network, every ready task will be submitted by Submit Queue automatically, otherwise ready tasks should still be Ready until network status become Online
       taskRunSubmittingAuto = yield fork(runTaskSubmittingAuto);
